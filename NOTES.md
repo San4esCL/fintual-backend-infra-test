@@ -59,15 +59,75 @@ ORDER BY created_at DESC
 LIMIT 20;
 ```
 
-## Deliberate non-goals
+---
+
+# Developer experience
+
+Canonical setup: [NEW_README.md](NEW_README.md) (linked from [README.md](README.md)). Tooling is **uv-only** for Python; `mise.toml` remains optional legacy from the assignment baseline.
+
+### Scripts (Makefile + `setup.ps1` parity)
+
+- `deps` / `sync` — `uv sync`
+- `wait-db` — waits for Postgres via `docker compose exec … pg_isready`
+- `setup` — deps → docker-up → wait-db → migrate → seed (**no auto-runserver**)
+- `run` — docker-up → wait-db → `.env.local` → `runserver`
+- `check` — `ruff check` + tests (with Postgres)
+- `doctor` — versions, compose status, DB readiness hint
+- Safer `env-init` — skips existing files unless `FORCE=1` / `-Force`
+
+### Environment
+
+- One committed template: `.env.example`; `env-init` copies it to `.env`, `.env.local`, `.env.staging`, `.env.production` (gitignored)
+- `ENVIRONMENT` in [`core/settings.py`](core/settings.py): non-local defaults `DEBUG=False`; rejects example `SECRET_KEY` when `DEBUG=False`
+
+### Deliberate DX non-goals
+
+- Pre-commit hooks
+- Full merge of README and NEW_README (assignment text stays in README)
+- CI database seeding (migrations + unit tests only)
+
+---
+
+# Production readiness (foundation)
+
+Shared with DX where it helps teammates and load balancers.
+
+### CI
+
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml) — Postgres 16 service, `uv sync`, migrate, `pytest`, `ruff check` (no `--fix`).
+
+### Health
+
+- `GET /health/live` — process up
+- `GET /health/ready` — `connection.ensure_connection()`
+
+### Container
+
+- [`Dockerfile`](Dockerfile) — multi-stage `uv sync` with `prod` group, **gunicorn** CMD
+- [`docker-compose.yml`](docker-compose.yml) — optional `web` service, `depends_on` postgres `service_healthy`, `DB_HOST=postgres`
+
+### Settings
+
+- `CONN_MAX_AGE` env-driven (default 60s when not `local`)
+- Structured key=value logging to stdout when `ENVIRONMENT != local`
+
+### Deferred (next day)
+
+- OpenTelemetry / Datadog on HTTP + DB spans
+- K8s manifests or Helm (Deployment, Ingress, probes → health routes)
+- PgBouncer / RDS Proxy (document when `CONN_MAX_AGE` is not enough)
+- `collectstatic`, secure headers middleware tuning, autoscaling
+- Cursor pagination, authentication
+
+---
+
+## Deliberate non-goals (overall)
 
 - Cursor pagination (offset pagination is sufficient for this scope)
 - Authentication
-- Developer experience (Docker, Makefile, env templates) — separate commit
-- Production deployment (Helm, health checks, etc.) — separate pass
+- Reshaping the domain model beyond perf needs
 
 ## Possible follow-ups (out of scope)
 
 - Tune trigram search threshold; add dedicated search smoke test
 - Cache or defer `view_count` writes further if read traffic dominates
-- Production: connection pooling, WSGI server, observability
