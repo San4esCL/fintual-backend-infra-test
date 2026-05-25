@@ -1,3 +1,20 @@
+# Vicente Ramirez Notes
+
+I was exploring Cursor in this test so i was using Agents and like the original README says i put all the chat transcript in transcript folder ([`transcript`](transcript))
+
+## Depth beats breadth
+
+- Developer Experience: I was trying to make the most easier to setup, in my mind i was in a scenario where a new member junior or mid senior enter to the team and he required to setup it in one day and start working on it in differents environment, sometimes some bugs that occurs in staging or production are hard to replicate locally based on the data in db so to make the dev exp better and easier i create some scripts for Unix (Linux/MacOs) and Windows to setup it entirely and just override the different environment variables. Also for someone to setup the database locally, then run migrate and seed maybe for some devs its hard to install a database in their laptops or they can have some issues, just requiring docker you can setup the postgres image and run everything locally without major issues. If i had another day then i will improve the logs so a dev can debug it easier also improving the CD so devs should not have issues with migrations when they forgot to run it in different environments and say it was working on my local !
+
+- Performance: In performance side i just try some endpoints and just looking the logic and db i was able to see that we were missing some indexes for basic queries. Also implemented pagination to different endpoints like post to avoid load all post + comments + tags per request
+
+- Production readiness: Implemented Continuous Integration when a event like push / pull request on main branch, so if the project is on github we will have a Github action running everytime when a previous event is triggered so our code can be more accurately running the tests and check the code quality along with the linter. Also improved env vars based on a .env file and delete the fixed values on settings.py. 
+Create a dockerfile to container the app with multistage also with a docker compose file to setup if required.
+If i had another day then i will implement OpenTelemetry, Github CD workflow along with AWS Elastic Containter Registry (ECS) to add extra level of security with the docker repo and image.
+
+
+# AI NOTES
+
 # Performance
 
 Interview focus: make slow endpoints usable on a seeded database (~100k posts, ~500k comments) without reshaping the domain or adding auth.
