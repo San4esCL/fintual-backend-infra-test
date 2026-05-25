@@ -111,10 +111,14 @@ Shared with DX where it helps teammates and load balancers.
 - `CONN_MAX_AGE` env-driven (default 60s when not `local`)
 - Structured key=value logging to stdout when `ENVIRONMENT != local`
 
+### Kubernetes (EKS prep)
+
+Baseline manifests in [`k8s/`](k8s/) — Deployment, Service, ALB Ingress, `secret.example.yaml`. CD workflows per environment still to add.
+
 ### Deferred (next day)
 
 - OpenTelemetry / Datadog on HTTP + DB spans
-- K8s manifests or Helm (Deployment, Ingress, probes → health routes)
+- GitHub CD workflows → ECR → EKS; Helm/Kustomize overlays per env
 - PgBouncer / RDS Proxy (document when `CONN_MAX_AGE` is not enough)
 - `collectstatic`, secure headers middleware tuning, autoscaling
 - Cursor pagination, authentication

@@ -1,0 +1,50 @@
+# Web workload — apply after building/pushing the image from Dockerfile to ECR.
+# Replace image and tune replicas/resources per environment in CD.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-devops-interview
+  labels:
+    app: backend-devops-interview
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend-devops-interview
+  template:
+    metadata:
+      labels:
+        app: backend-devops-interview
+    spec:
+      containers:
+        - name: web
+          # CD: set to your ECR image, e.g. 123456789012.dkr.ecr.us-east-1.amazonaws.com/backend-devops-interview:sha
+          image: REPLACE_ME_ECR_IMAGE:tag
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: backend-devops-interview-env
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5

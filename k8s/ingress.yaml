@@ -1,0 +1,28 @@
+# EKS: requires AWS Load Balancer Controller (ALB Ingress).
+# Replace host and certificate ARN per environment in CD.
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: backend-devops-interview
+  labels:
+    app: backend-devops-interview
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/healthcheck-path: /health/ready
+    alb.ingress.kubernetes.io/healthcheck-interval-seconds: "15"
+    # alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:REGION:ACCOUNT:certificate/REPLACE_ME
+    # alb.ingress.kubernetes.io/listen-ports: '[{"HTTPS":443}]'
+spec:
+  ingressClassName: alb
+  rules:
+    - host: api.REPLACE_ME.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: backend-devops-interview
+                port:
+                  number: 80

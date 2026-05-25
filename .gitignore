@@ -13,3 +13,6 @@ __pycache__/
 .env.*.local
 .env.production
 .env.staging
+
+# Kubernetes secrets (use secret.example.yaml as template)
+k8s/secret.yaml

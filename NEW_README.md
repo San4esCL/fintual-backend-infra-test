@@ -218,6 +218,10 @@ Use `make wait-db` or rely on `make setup` / `make run` / `make test`, which wai
 
 GitHub Actions (`.github/workflows/ci.yml`) runs on push/PR to `main`/`master`: Postgres 16 service, `uv sync`, migrate, `pytest`, `ruff check`.
 
+## Kubernetes (future CD on EKS)
+
+Baseline manifests live in [`k8s/`](k8s/) (Deployment, Service, ALB Ingress, `secret.example.yaml`). See [`k8s/README.md`](k8s/README.md) for apply steps and planned GitHub CD → ECR → EKS flow.
+
 ---
 
 ## Next Steps
