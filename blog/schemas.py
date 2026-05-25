@@ -37,6 +37,7 @@ class PostDetailOut(Schema):
     body: str
     author: AuthorOut
     tags: list[TagOut]
+    comment_count: int
     comments: list[CommentOut]
     view_count: int
     created_at: datetime

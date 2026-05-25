@@ -1,4 +1,6 @@
+from django.contrib.postgres.indexes import GinIndex
 from django.db import models
+from django.db.models import Q
 from django.utils import timezone
 
 
@@ -8,6 +10,11 @@ class User(models.Model):
     display_name = models.CharField(max_length=128)
     bio = models.TextField(blank=True)
     created_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["email"], name="blog_user_email_idx"),
+        ]
 
     def __str__(self) -> str:
         return self.username
@@ -31,6 +38,25 @@ class Post(models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
     tags = models.ManyToManyField(Tag, related_name="posts", blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=["-created_at"],
+                condition=Q(is_published=True),
+                name="blog_post_pub_created_desc_idx",
+            ),
+            GinIndex(
+                fields=["title"],
+                name="blog_post_title_trgm_idx",
+                opclasses=["gin_trgm_ops"],
+            ),
+            GinIndex(
+                fields=["body"],
+                name="blog_post_body_trgm_idx",
+                opclasses=["gin_trgm_ops"],
+            ),
+        ]
 
     def __str__(self) -> str:
         return self.title
